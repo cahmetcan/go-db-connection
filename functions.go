@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-func execQuery(query string) ([]interface{}, string, string) {
+func execQuery(query string) ([]Result, string, string) {
 
 	connTime := time.Now()
 	_, conn, err := dbConnect()
@@ -24,20 +24,21 @@ func execQuery(query string) ([]interface{}, string, string) {
 
 	if err != nil {
 		fmt.Println("Error executing query:", err)
-		return nil, err.Error(), "ERROR"
+		panic(err)
 	}
 
-	values := make([]interface{}, 0)
+	var rowSlice []Result
 	for rows.Next() {
-		value, err := rows.Values()
+		var r Result
+		err := rows.Scan(&r.Id, &r.Created_at, &r.Title, &r.Db_time)
 		if err != nil {
 			fmt.Println("Error scanning rows:", err)
-			return nil, err.Error(), "ERROR"
+			panic(err)
 		}
-		values = append(values, value...)
+		rowSlice = append(rowSlice, r)
 	}
 
-	return values, (time.Since(startQuery)).String(), (time.Since(connTime) - time.Since(startQuery)).String()
+	return rowSlice, (time.Since(startQuery)).String(), (time.Since(connTime) - time.Since(startQuery)).String()
 }
 
 // must be removed
