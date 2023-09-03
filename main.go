@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gin-contrib/gzip"
+	// "github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,7 +12,7 @@ func main() {
 	fmt.Println("Starting server...")
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	// r.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(200, "pong ")
@@ -26,7 +26,7 @@ func main() {
 	r.GET("/getCountsByParsing", getCountsByParsing)
 	r.GET("/getRowsWithLimit", getRowsWithLimit) // getRowsWithLimit?limit=10
 	r.GET("/getMaxId", getMaxId)
-	r.GET("/getRandom", getRandomRowById)
+	// r.GET("/getRandom", getRandomRowById)
 
 	go func() {
 		if err := r.Run(":9000"); err != nil {

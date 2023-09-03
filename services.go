@@ -8,6 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Response struct {
+	Success        bool     `json:"success"`
+	Result         []Result `json:"result"`
+	ConnectionTime string   `json:"connectionTime"`
+	QueryTime      string   `json:"queryTime"`
+}
+type Response2 struct {
+	Success        bool    `json:"success"`
+	Result         Result2 `json:"result"`
+	ConnectionTime string  `json:"connectionTime"`
+	QueryTime      string  `json:"queryTime"`
+}
+
 // Executes the query given in the parameter
 func executeParam(c *gin.Context) {
 	tableName := c.Query("q")
@@ -41,56 +54,6 @@ func getCountsByParsing(c *gin.Context) {
 	})
 }
 
-/*
-{
-  "success": true,
-  "result": [
-    {
-      "id": 298227258,
-      "created_at": "2023-08-28T21:00:00.000Z",
-      "title": "sansli numaram 83405",
-      "db_time": "2023-09-01T21:55:22.790Z"
-    },
-    {
-      "id": 298227257,
-      "created_at": "2023-08-28T21:00:00.000Z",
-      "title": "sansli numaram 916151",
-      "db_time": "2023-09-01T21:55:22.790Z"
-    },
-    {
-      "id": 298227256,
-      "created_at": "2023-08-28T21:00:00.000Z",
-      "title": "sansli numaram 933185",
-      "db_time": "2023-09-01T21:55:22.790Z"
-    },
-    {
-      "id": 298227255,
-      "created_at": "2023-08-28T21:00:00.000Z",
-      "title": "sansli numaram 878416",
-      "db_time": "2023-09-01T21:55:22.790Z"
-    }
-  ],
-  "connectionTime": "1ms",
-  "queryTime": "54ms"
-}
-*/
-
-// struct for the response
-type Response struct {
-	Success        bool     `json:"success"`
-	Result         []Result `json:"result"`
-	ConnectionTime string   `json:"connectionTime"`
-	QueryTime      string   `json:"queryTime"`
-}
-
-// struct for the result
-type Result struct {
-	Id         int       `json:"id"`
-	Created_at time.Time `json:"created_at"`
-	Title      string    `json:"title"`
-	Db_time    time.Time `json:"db_time"`
-}
-
 // Gets the rows with the limit given in the parameter
 func getRowsWithLimit(c *gin.Context) {
 	startTime := time.Now()
@@ -119,7 +82,6 @@ func getRowsWithLimit(c *gin.Context) {
 
 // Gets the max id of the table
 func getMaxId(c *gin.Context) {
-	startTime := time.Now()
 	tableName := c.Query("q")
 	if tableName == "" {
 		c.JSON(400, gin.H{
@@ -129,17 +91,17 @@ func getMaxId(c *gin.Context) {
 		return
 	}
 
-	query := "SELECT max(id) FROM " + tableName
+	rows, execTime, a := maxId(tableName)
 
-	rows, execTime, a := execQuery(query)
+	result := Response2{
+		Success:        true,
+		Result:         rows,
+		ConnectionTime: a,
+		QueryTime:      execTime,
+	}
 
-	c.JSON(200, gin.H{
-		"success":          "true",
-		"endPointCallTime": time.Since(startTime).String(),
-		"queryExecTime":    execTime,
-		"databaseConnTime": a,
-		"message":          rows,
-	})
+	c.JSON(200, result)
+
 }
 
 // Gets random row by id
