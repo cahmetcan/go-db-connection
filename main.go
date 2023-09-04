@@ -6,7 +6,10 @@ import (
 
 	// "github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v4"
 )
+
+var db *pgx.Conn
 
 func main() {
 	fmt.Println("Starting server...")
