@@ -6,10 +6,7 @@ import (
 
 	// "github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v4"
 )
-
-var db *pgx.Conn
 
 func main() {
 	fmt.Println("Starting server...")
@@ -20,11 +17,8 @@ func main() {
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(200, "pong ")
 	})
-	/* 	r.GET("/qE", query)
-	   	r.GET("/insert", insertRandomId)
-	   	r.GET("/getCount", getCount) */
 
-	// ÖZGÜR BEY'İN YAZDIKLARI
+	dbConnect()
 	r.GET("/execute", executeParam) // execute?query=select * from test
 	r.GET("/getCountsByParsing", getCountsByParsing)
 	r.GET("/getRowsWithLimit", getRowsWithLimit) // getRowsWithLimit?limit=10

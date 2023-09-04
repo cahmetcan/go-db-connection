@@ -3,10 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
-
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Result struct {
@@ -24,20 +22,13 @@ type Result2 struct {
 }
 
 func execQuery(query string) ([]Result, string, string) {
-
 	connTime := time.Now()
-	_, conn, err := dbConnect()
-
-	if err != nil {
-		fmt.Println("Error connecting to database:", err)
-		panic(err)
-	}
 
 	startQuery := time.Now()
-	rows, err := conn.Query(context.Background(), query)
+	rows, err := db.Query(context.Background(), query)
 
 	if err != nil {
-		fmt.Println("Error executing query:", err)
+		log.Fatal("Error executing query:", err)
 		panic(err)
 	}
 
@@ -55,11 +46,9 @@ func execQuery(query string) ([]Result, string, string) {
 	return rowSlice, (time.Since(startQuery)).String(), (time.Since(connTime) - time.Since(startQuery)).String()
 }
 
-// must be removed
-func count(query string, Conn *pgx.Conn) (any, int, string) {
-
+func count(query string) (any, int, string) {
 	startQuery := time.Now()
-	rows, err := Conn.Query(context.Background(), query)
+	rows, err := db.Query(context.Background(), query)
 	execTime := time.Since(startQuery)
 
 	if err != nil {
@@ -84,9 +73,9 @@ func count(query string, Conn *pgx.Conn) (any, int, string) {
 	return rows, 1, execTime.String()
 }
 
-func poolQuery(query string, dbPool *pgxpool.Pool) (int64, string) {
+func poolQuery(query string) (int64, string) {
 	startQuery := time.Now()
-	rows, err := dbPool.Exec(context.Background(), query)
+	rows, err := db.Exec(context.Background(), query)
 	execTime := time.Since(startQuery)
 
 	if err != nil {
@@ -101,15 +90,9 @@ func maxId(tableName string) (Result2, string, string) {
 	fmt.Println("maxId", tableName)
 
 	connTime := time.Now()
-	_, conn, err := dbConnect()
-
-	if err != nil {
-		fmt.Println("Error connecting to database:", err)
-		panic(err)
-	}
 
 	startQuery := time.Now()
-	rows, err := conn.Query(context.Background(), "Select  id maxID, created_at, title, CURRENT_TIMESTAMP  db_time FROM test_table where id = (select max(id) from test_table)")
+	rows, err := db.Query(context.Background(), "Select  id maxID, created_at, title, CURRENT_TIMESTAMP  db_time FROM test_table where id = (select max(id) from test_table)")
 
 	if err != nil {
 		fmt.Println("Error executing query:", err)

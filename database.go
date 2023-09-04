@@ -3,13 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
 	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 )
+
+var db *pgx.Conn
 
 type Row struct {
 	id         any
@@ -18,26 +20,19 @@ type Row struct {
 	db_time    time.Time
 }
 
-func dbConnect() (*pgxpool.Pool, *pgx.Conn, error) {
+func dbConnect() {
 	err := godotenv.Load()
 	if err != nil {
-		fmt.Println("Error loading .env file")
+		log.Fatal("Error loading .env file")
 	}
 	databaseUrl := os.Getenv("DATABASE_URL")
 
-	dbPool, err := pgxpool.Connect(context.Background(), databaseUrl)
-
+	conn, err := pgx.Connect(context.Background(), databaseUrl)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		return nil, nil, err
+		panic(err)
 	}
-	fmt.Println("Connected to database")
+	db = conn
+	log.Println("Connected to database")
 
-	conn, err := dbPool.Acquire(context.Background())
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to acquire connection from pool: %v\n", err)
-		return nil, nil, err
-	}
-
-	return dbPool, conn.Conn(), nil
 }
